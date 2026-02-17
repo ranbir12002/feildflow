@@ -91,8 +91,9 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
             updateData.password = await bcrypt.hash(password, 10);
         }
 
+        const userId = String(id);
         const user = await prisma.user.update({
-            where: { id, accountId: req.user!.accountId },
+            where: { id: userId, accountId: req.user!.accountId },
             data: {
                 ...updateData,
                 companies: companyIds ? {
@@ -127,8 +128,9 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 export const deleteUser = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     try {
+        const userId = String(id);
         await prisma.user.delete({
-            where: { id, accountId: req.user!.accountId }
+            where: { id: userId, accountId: req.user!.accountId }
         });
         res.status(204).send();
     } catch (error) {

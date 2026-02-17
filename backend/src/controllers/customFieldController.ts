@@ -48,10 +48,11 @@ export const createCustomField = async (req: AuthRequest, res: Response) => {
 export const deleteCustomField = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     try {
+        const fieldId = String(id);
         // Warning: This will cascade delete values if we set up relations that way or handle manually
-        await prisma.customFieldValue.deleteMany({ where: { customFieldId: id } });
+        await prisma.customFieldValue.deleteMany({ where: { customFieldId: fieldId } });
         await prisma.customField.delete({
-            where: { id, accountId: req.user!.accountId }
+            where: { id: fieldId, accountId: req.user!.accountId }
         });
         res.status(204).send();
     } catch (error) {

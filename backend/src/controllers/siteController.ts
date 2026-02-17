@@ -37,9 +37,10 @@ export const getAllSites = async (req: AuthRequest, res: Response) => {
 export const getSites = async (req: AuthRequest, res: Response) => {
     const { companyId } = req.params;
     try {
+        const cId = String(companyId);
         const sites = await prisma.site.findMany({
             where: {
-                companyId,
+                companyId: cId,
                 company: {
                     accountId: req.user?.accountId
                 }
@@ -83,8 +84,9 @@ export const createSite = async (req: AuthRequest, res: Response) => {
     if (!name) return res.status(400).json({ error: 'Site name is required' });
 
     try {
+        const cId = String(companyId);
         const company = await prisma.company.findFirst({
-            where: { id: companyId, accountId: req.user?.accountId }
+            where: { id: cId, accountId: req.user?.accountId }
         });
 
         if (!company) {
@@ -107,7 +109,7 @@ export const createSite = async (req: AuthRequest, res: Response) => {
                 stcZone,
                 veecZone,
                 rates,
-                companyId
+                companyId: cId
             }
         });
 
