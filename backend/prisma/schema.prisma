@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, accountId])
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String?
+  roleId    String?
+  role      Role?     @relation(fields: [roleId], references: [id])
+  accountId String
+  account   Account   @relation(fields: [accountId], references: [id])
+  companies Company[] @relation("UserCompanies")
+  teams     Team[]    @relation("UserTeams")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Account {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  users     User[]
+  roles     Role[]
+  companies Company[]
+  customFields CustomField[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Company {
+  id        String     @id @default(uuid())
+  name      String
+  accountId String
+  account   Account    @relation(fields: [accountId], references: [id])
+  teams     Team[]
+  users     User[]     @relation("UserCompanies")
+  sites     Site[]
+  employees Employee[] @relation("CompanyEmployees")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Site {
+  id               String   @id @default(uuid())
+  name             String
+  address          Json?    // { Address, City, State, PostalCode, Country }
+  billingAddress   Json?    // { Address, City, State, PostalCode }
+  billingContact   String?
+  primaryContact   Json?    // { Contact, Title, GivenName, FamilyName, Email, WorkPhone, CellPhone, Fax, Position, PreferredNotificationMethod }
+  publicNotes      String?
+  privateNotes     String?
+  zone             Int?
+  preferredTechs   Int[]
+  customers        Int[]
+  archived         Boolean  @default(false)
+  stcZone          Int?
+  veecZone         String?
+  rates            Json?    // { ServiceFee }
+  companyId        String
+  company          Company  @relation(fields: [companyId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Team {
+  id        String     @id @default(uuid())
+  name      String
+  companies Company[]
+  users     User[]     @relation("UserTeams")
+  employees Employee[] @relation("TeamEmployees")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Employee {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  companies Company[] @relation("CompanyEmployees")
+  teams     Team[]    @relation("TeamEmployees")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model CustomField {
+  id          String   @id @default(uuid())
+  name        String
+  label       String
+  type        String   // TEXT, NUMBER, DATE, SELECT
+  options     Json?    // For SELECT type
+  module      String   // e.g., "USER", "SITE", "COMPANY"
+  required    Boolean  @default(false)
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id])
+  values      CustomFieldValue[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([name, accountId, module])
+}
+
+model CustomFieldValue {
+  id            String      @id @default(uuid())
+  value         String
+  customFieldId String
+  customField   CustomField @relation(fields: [customFieldId], references: [id])
+  entityId      String      // ID of the User, Site, etc.
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([customFieldId, entityId])
+}
