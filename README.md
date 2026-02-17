@@ -31,7 +31,10 @@ FieldFlow is a robust, multi-tenant people management system designed for organi
 
 ## 📊 Data Model (PostgreSQL)
 
-The application uses an account-based multi-tenancy model.
+The application uses an account-based multi-tenancy model. 
+
+> [!TIP]
+> **View the [Full Database Model & ER Diagram](./DATABASE_MODEL.md)** for detailed field definitions and relationship mappings.
 
 ### Core Entities
 - **Account**: The top-level entity (Tenant). All data belongs to an Account.
